@@ -18,8 +18,7 @@ def index():
         res = supabase.table("todos").select("*").order("id", desc=False).execute()
         todos = res.data if res.data else []
     except Exception as e:
-        # DB 에러 발생 시 서버를 멈추지 않고 화면에 에러를 출력
-        return f"<div style='padding:20px; font-family:sans-serif;'><h2>⚠️ 데이터베이스 연결 오류</h2><p><b>원인:</b> {str(e)}</p></div>"
+        return f"<div style='padding:20px; font-family:sans-serif;'><h2 style='color:red;'>⚠️ 데이터베이스 목록 불러오기 오류</h2><p><b>원인:</b> {str(e)}</p></div>"
         
     return render_template("index.html", todos=todos)
 
@@ -31,7 +30,8 @@ def add_todo():
             supabase = get_supabase()
             supabase.table("todos").insert({"title": title, "completed": False}).execute()
         except Exception as e:
-            print("Add Todo Error:", e)
+            # 추가 실패 시 화면에 에러를 띄웁니다.
+            return f"<div style='padding:20px; font-family:sans-serif;'><h2 style='color:red;'>⚠️ 할 일 추가 실패</h2><p><b>원인:</b> {str(e)}</p><a href='/'>뒤로 가기</a></div>"
     return redirect(url_for("index"))
 
 @app.route("/toggle/<int:todo_id>")
@@ -43,7 +43,7 @@ def toggle_todo(todo_id):
             current_status = res.data[0]["completed"]
             supabase.table("todos").update({"completed": not current_status}).eq("id", todo_id).execute()
     except Exception as e:
-        print("Toggle Todo Error:", e)
+        return f"<div style='padding:20px; font-family:sans-serif;'><h2 style='color:red;'>⚠️ 상태 변경 실패</h2><p><b>원인:</b> {str(e)}</p><a href='/'>뒤로 가기</a></div>"
     return redirect(url_for("index"))
 
 @app.route("/delete/<int:todo_id>")
@@ -52,7 +52,7 @@ def delete_todo(todo_id):
         supabase = get_supabase()
         supabase.table("todos").delete().eq("id", todo_id).execute()
     except Exception as e:
-        print("Delete Todo Error:", e)
+        return f"<div style='padding:20px; font-family:sans-serif;'><h2 style='color:red;'>⚠️ 삭제 실패</h2><p><b>원인:</b> {str(e)}</p><a href='/'>뒤로 가기</a></div>"
     return redirect(url_for("index"))
 
 if __name__ == "__main__":
