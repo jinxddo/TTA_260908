@@ -4,9 +4,9 @@ from supabase import create_client, Client
 
 app = Flask(__name__)
 
-# 전달해주신 Supabase 접속 정보 적용 (URL 끝의 /rest/v1/ 은 제외해야 정상 작동합니다)
+# 정확하게 찾으신 URL과 Legacy anon 키 적용!
 SUPABASE_URL = "https://pyotrqmsscvrunfdktxv.supabase.co"
-SUPABASE_KEY = "sb_publishable_DdkQ6RcMsCNvBHzlyLXbRA_9HRhZQJo"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5b3RycW1zc2N2cnVuZmRrdHh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MTQ4MzIsImV4cCI6MjEwNDQ5MDgzMn0.WCIWC8JCJsGMYZO37Azls_68zxbT-SH4wGKT8XntHyE"
 
 # Supabase 클라이언트 연결
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -15,12 +15,12 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 def index():
     todos = []
     try:
-        # DB에서 할 일 목록 가져오기
+        # DB에서 할 일 목록 가져오기 (id 순 정렬)
         res = supabase.table("todos").select("*").order("id", desc=False).execute()
         todos = res.data if res.data else []
     except Exception as e:
-        # 에러 발생 시 화면에 출력하여 원인 파악
-        return f"<h2 style='color:red;'>데이터베이스 연결 에러: {str(e)}</h2><p>Supabase의 RLS(보안설정)가 해제되어 있는지 확인하세요.</p>"
+        # 혹시라도 에러가 나면 화면에 표시 (500 에러 방지)
+        return f"<h2 style='color:red;'>데이터베이스 연결 에러: {str(e)}</h2><p>에러가 지속되면 알려주세요!</p>"
         
     return render_template("index.html", todos=todos)
 
